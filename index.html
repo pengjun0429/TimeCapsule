@@ -27,13 +27,10 @@
             border-color: #e94560 !important;
             box-shadow: 0 0 10px rgba(233, 69, 96, 0.3) !important;
         }
-        /* 隱藏 Google 原本的跳轉 iframe */
         #hidden_iframe { display: none; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
-
-    <!-- 靜默送出用的隱藏 iframe -->
     <script type="text/javascript">var submitted=false;</script>
     <iframe name="hidden_iframe" id="hidden_iframe" onload="if(submitted) {showSuccess();}"></iframe>
 
@@ -41,8 +38,7 @@
         <h1 class="text-4xl font-bold mb-3 tracking-[0.3em] ml-3">憶起</h1>
         <p class="text-gray-400 text-sm mb-10 tracking-widest">RECALL THE MOMENT</p>
 
-        <!-- 請把下面的 URL 換成你表單的「預覽頁面」中的 form action 網址 -->
-        <form action="https://docs.google.com/forms/d/e/你的表單ID/formResponse" 
+        <form action="https://docs.google.com/forms/d/e/1-Q3IUzI9ZtWIKbiwUpOUUX9mg8v8PUjT6k58R5hOhO4/formResponse" 
               method="POST" 
               target="hidden_iframe" 
               onsubmit="submitted=true;" 
@@ -69,7 +65,6 @@
         </form>
     </div>
 
-    <!-- 成功畫面 (預設隱藏) -->
     <div id="success-message" class="hidden text-center animate-pulse">
         <h2 class="text-3xl font-light tracking-widest text-white mb-4">回憶已送往未來</h2>
         <p class="text-gray-400">時間到了，我們會再相見。</p>
@@ -84,6 +79,5 @@
             }, 500);
         }
     </script>
-
 </body>
 </html>
