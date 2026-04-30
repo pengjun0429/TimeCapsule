@@ -31,35 +31,35 @@
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
+
+    <!-- 靜默送出用的隱藏 iframe -->
     <script type="text/javascript">var submitted=false;</script>
     <iframe name="hidden_iframe" id="hidden_iframe" onload="if(submitted) {showSuccess();}"></iframe>
 
     <div id="form-container" class="glass w-full max-w-md p-10 shadow-2xl text-center transition-all duration-500">
-        <h1 class="text-4xl font-bold mb-3 tracking-[0.3em] ml-3"不要看我,看底下</h1>
-        <p class="text-gray-400 text-sm mb-10 tracking-widest">RECALL THE MOMENT</p>
+        <h1 class="text-4xl font-bold mb-3 tracking-[0.3em] ml-3"看我幹啥,看下面阿</h1>
+        <p class="text-gray-400 text-sm mb-10 tracking-widest uppercase">Recall the moment</p>
 
-        <form action="https://docs.google.com/forms/d/e/1FAIpQLSc7y7O-T_v0o_kY4VzH7VzH7VzH7VzH7VzH7VzH7VzH7VzH/formResponse" 
-      method="POST" 
-      target="hidden_iframe" 
-      class="space-y-6 text-left">
-    
-    <input type="text" name="entry.1163321467" placeholder="IG ID" required>
-    <textarea name="entry.372515629" placeholder="內容" required></textarea>
-    <input type="text" name="entry.1806256761" placeholder="YYYY/MM/DD" required>
-    
-    <button type="submit">封存回憶</button>
-</form>
+        <!-- 請務必更換下方的 1FAIpQLS... 為你表單預覽頁面中正確的長 ID -->
+        <form action="https://docs.google.com/forms/d/e/1FAIpQLSc-W_ZfOitD_p2_W7D-Z8HhM8Z9Q8Z9Q8Z9Q8Z9Q8Z9Q8Z/formResponse" 
+              method="POST" 
+              target="hidden_iframe" 
+              onsubmit="submitted=true;" 
+              class="space-y-6 text-left">
             
+            <!-- Instagram ID -->
             <div>
                 <label class="block text-[10px] uppercase tracking-widest mb-2 opacity-50">Instagram ID</label>
                 <input type="text" name="entry.1163321467" placeholder="@" class="w-full p-3 rounded-xl focus:outline-none transition" required>
             </div>
 
+            <!-- 信件內容 -->
             <div>
                 <label class="block text-[10px] uppercase tracking-widest mb-2 opacity-50">封存的內容</label>
                 <textarea name="entry.372515629" rows="4" placeholder="寫給未來的自己..." class="w-full p-3 rounded-xl focus:outline-none transition" required></textarea>
             </div>
 
+            <!-- 開啟日期 (這裡維持 type="date" 但會傳給 entry.1806256761) -->
             <div>
                 <label class="block text-[10px] uppercase tracking-widest mb-2 opacity-50">開啟日期</label>
                 <input type="date" name="entry.1806256761" class="w-full p-3 rounded-xl focus:outline-none transition" required>
@@ -71,6 +71,7 @@
         </form>
     </div>
 
+    <!-- 成功畫面 -->
     <div id="success-message" class="hidden text-center animate-pulse">
         <h2 class="text-3xl font-light tracking-widest text-white mb-4">回憶已送往未來</h2>
         <p class="text-gray-400">時間到了，我們會再相見。</p>
