@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>憶起 Recall - 時空膠囊</title>
+    <title>回憶 Recall - 時空膠囊</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -35,14 +35,20 @@
     <iframe name="hidden_iframe" id="hidden_iframe" onload="if(submitted) {showSuccess();}"></iframe>
 
     <div id="form-container" class="glass w-full max-w-md p-10 shadow-2xl text-center transition-all duration-500">
-        <h1 class="text-4xl font-bold mb-3 tracking-[0.3em] ml-3">憶起</h1>
+        <h1 class="text-4xl font-bold mb-3 tracking-[0.3em] ml-3"不要看我,看底下</h1>
         <p class="text-gray-400 text-sm mb-10 tracking-widest">RECALL THE MOMENT</p>
 
-        <form action="https://docs.google.com/forms/d/e/1-Q3IUzI9ZtWIKbiwUpOUUX9mg8v8PUjT6k58R5hOhO4/formResponse" 
-              method="POST" 
-              target="hidden_iframe" 
-              onsubmit="submitted=true;" 
-              class="space-y-6 text-left">
+        <form action="https://docs.google.com/forms/d/e/1FAIpQLSc7y7O-T_v0o_kY4VzH7VzH7VzH7VzH7VzH7VzH7VzH7VzH/formResponse" 
+      method="POST" 
+      target="hidden_iframe" 
+      class="space-y-6 text-left">
+    
+    <input type="text" name="entry.1163321467" placeholder="IG ID" required>
+    <textarea name="entry.372515629" placeholder="內容" required></textarea>
+    <input type="text" name="entry.1806256761" placeholder="YYYY/MM/DD" required>
+    
+    <button type="submit">封存回憶</button>
+</form>
             
             <div>
                 <label class="block text-[10px] uppercase tracking-widest mb-2 opacity-50">Instagram ID</label>
