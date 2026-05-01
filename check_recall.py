@@ -20,50 +20,63 @@ def send_line_push(message):
         "to": USER_ID,
         "messages": [{"type": "text", "text": message}]
     }
-    requests.post(url, headers=headers, json=payload)
+    res = requests.post(url, headers=headers, json=payload)
+    print(f"LINE 伺服器回應: {res.status_code}")
 
 def check_memories():
     try:
-        # 讀取 CSV，header=0 表示第一列是標題
-        df = pd.read_csv(SHEET_URL, encoding='utf-8-sig')
+        # 讀取 CSV，並忽略第一列標題名稱，改用數字索引
+        df = pd.read_csv(SHEET_URL, encoding='utf-8-sig', header=0)
         
-        # 顯示目前讀取到的欄位數，確保有讀到 4 欄以上
-        print(f"📊 目前讀取到的總欄位數: {len(df.columns)}")
+        # 打印目前看到的總欄位數
+        col_count = len(df.columns)
+        print(f"🔍 診斷：偵測到 {col_count} 個欄位")
         
-        # 直接指定：第 2 欄是 ID, 第 3 欄是內容, 第 4 欄是日期
-        # (Python 索引從 0 開始，所以是 1, 2, 3)
-        col_ig = df.columns[1]
-        col_content = df.columns[2]
-        col_date = df.columns[3]
-        
-        print(f"✅ 自動鎖定欄位：ID={col_ig}, 內容={col_content}, 日期={col_date}")
+        if col_count < 4:
+            print("❌ 錯誤：試算表欄位不足 4 欄，請檢查 Google Sheet！")
+            return
 
+        # 直接用位置拿資料 (iloc)
+        # 第 1 欄 (index 0): 時戳 -> 忽略
+        # 第 2 欄 (index 1): Instagram ID
+        # 第 3 欄 (index 2): 信件內容
+        # 第 4 欄 (index 3): 開啟日期
+        
         now = datetime.now()
-        # 準備匹配日期 (YYYY/M/D 格式)
+        # 匹配截圖中的格式: 2026/5/1
         today_str = f"{now.year}/{now.month}/{now.day}"
+        # 匹配標準格式: 2026-05-01
         today_dash = now.strftime('%Y-%m-%d')
         
-        # 過濾日期
-        df[col_date] = df[col_date].astype(str).str.strip()
-        due_memories = df[df[col_date].isin([today_str, today_dash])]
+        print(f"📅 正在尋找日期為 {today_str} 或 {today_dash} 的資料...")
+
+        # 找出第 4 欄符合今天日期的行
+        # df.iloc[:, 3] 代表「所有列的第 4 欄」
+        mask = df.iloc[:, 3].astype(str).str.strip().isin([today_str, today_dash])
+        due_memories = df[mask]
         
         if not due_memories.empty:
-            msg = f"🔔 憶起 (Recall) 提醒：今天有 {len(due_memories)} 則回憶到期！\n"
+            count = len(due_memories)
+            msg = f"🔔 憶起 (Recall) 提醒：今天有 {count} 則回憶到期！\n"
             msg += "===================="
-            for _, row in due_memories.iterrows():
-                msg += f"\n👤 傳送者: {row[col_ig]}\n📜 內容: {row[col_content]}\n"
+            for i in range(len(due_memories)):
+                row = due_memories.iloc[i]
+                ig_id = row.iloc[1]   # 第 2 欄
+                content = row.iloc[2] # 第 3 欄
+                msg += f"\n👤 傳送者: {ig_id}\n"
+                msg += f"📜 內容: {content}\n"
                 msg += "--------------------"
             
             if LINE_TOKEN and USER_ID:
                 send_line_push(msg)
-                print("✅ 訊息已送出！")
+                print("✅ 成功：訊息已推送到 LINE！")
             else:
-                print("⚠️ 缺少金鑰，僅列印：\n", msg)
+                print("⚠️ 警告：缺少 LINE 金鑰，僅在日誌顯示：\n", msg)
         else:
-            print(f"✨ 檢查完畢（{today_str}）：今日無到期回憶。")
+            print(f"✨ 檢查完畢：今日 ({today_str}) 沒有到期的回憶。")
             
     except Exception as e:
-        print(f"💥 發生錯誤: {e}")
+        print(f"💥 發生未知錯誤: {e}")
 
 if __name__ == "__main__":
     check_memories()
