@@ -3,131 +3,54 @@ import requests
 import os
 from datetime import datetime
 
-# 試算表連結
 SHEET_URL = "https://docs.google.com/spreadsheets/d/13DzEOTqFqV1czjQVuz8zONNz51k0_A3YgL_o47POsbQ/export?format=csv"
-
-# 環境變數
 LINE_TOKEN = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
 USER_ID = os.getenv('LINE_USER_ID')
 
-def send_flex_message(ig_id, content):
-    """發送美化後的 Flex Message 卡片"""
+def send_line_push(message):
     url = "https://api.line.me/v2/bot/message/push"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {LINE_TOKEN}"
-    }
-    
-    # 處理 IG 連結 (去掉 @ 符號以確保連結正確)
-    clean_ig_id = ig_id.replace('@', '').strip()
-    ig_link = f"https://www.instagram.com/{clean_ig_id}/"
-
-    flex_contents = {
-        "type": "bubble",
-        "header": {
-            "type": "box",
-            "layout": "vertical",
-            "contents": [
-                {"type": "text", "text": "憶起 Recall", "weight": "bold", "color": "#e94560", "size": "sm", "tracking": "0.2em"}
-            ]
-        },
-        "hero": {
-            "type": "image",
-            "url": "https://images.unsplash.com/photo-1516533037047-282d815757f1?auto=format&fit=crop&q=80&w=600",
-            "size": "full",
-            "aspectRatio": "20:13",
-            "aspectMode": "cover"
-        },
-        "body": {
-            "type": "box",
-            "layout": "vertical",
-            "contents": [
-                {"type": "text", "text": "時空膠囊到期", "weight": "bold", "size": "xl", "color": "#1a1a2e"},
-                {
-                    "type": "box",
-                    "layout": "vertical",
-                    "margin": "lg",
-                    "spacing": "sm",
-                    "contents": [
-                        {
-                            "type": "box",
-                            "layout": "baseline",
-                            "spacing": "sm",
-                            "contents": [
-                                {"type": "text", "text": "傳送者", "color": "#aaaaaa", "size": "sm", "flex": 1},
-                                {"type": "text", "text": f"{ig_id}", "wrap": True, "color": "#666666", "size": "sm", "flex": 4}
-                            ]
-                        },
-                        {
-                            "type": "box",
-                            "layout": "vertical",
-                            "margin": "md",
-                            "contents": [
-                                {"type": "text", "text": "封存內容：", "color": "#aaaaaa", "size": "sm"},
-                                {"type": "text", "text": f"{content}", "wrap": True, "color": "#333333", "size": "md", "margin": "sm", "style": "italic"}
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        "footer": {
-            "type": "box",
-            "layout": "vertical",
-            "spacing": "sm",
-            "contents": [
-                {
-                    "type": "button",
-                    "style": "primary",
-                    "color": "#e94560",
-                    "action": {
-                        "type": "uri",
-                        "label": "前往 Instagram",
-                        "uri": ig_link
-                    }
-                }
-            ]
-        }
-    }
-
-    payload = {
-        "to": USER_ID,
-        "messages": [
-            {
-                "type": "flex",
-                "altText": "您有一份到期的回憶！",
-                "contents": flex_contents
-            }
-        ]
-    }
-    
-    res = requests.post(url, headers=headers, json=payload)
-    return res.status_code
+    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {LINE_TOKEN}"}
+    payload = {"to": USER_ID, "messages": [{"type": "text", "text": message}]}
+    r = requests.post(url, headers=headers, json=payload)
+    print(f"📡 LINE 伺服器回應: {r.status_code}")
 
 def check_memories():
     try:
+        # 1. 讀取並顯示基礎資訊
         df = pd.read_csv(SHEET_URL, encoding='utf-8-sig')
         df.columns = df.columns.str.strip()
+        print(f"📊 成功讀取試算表！總列數: {len(df)}，欄位: {list(df.columns)}")
         
-        ig_col = df.columns[1]
-        content_col = df.columns[2]
+        # 2. 鎖定日期欄位 (假設在第四欄)
         date_col = df.columns[3]
-
+        
+        # 3. 取得今天日期多種格式
         now = datetime.now()
-        today_str = f"{now.year}/{now.month}/{now.day}"
-        today_dash = now.strftime('%Y-%m-%d')
+        t1 = f"{now.year}/{now.month}/{now.day}"        # 2026/5/1
+        t2 = f"{now.year}/{now.month:02d}/{now.day:02d}" # 2026/05/01
+        t3 = now.strftime('%Y-%m-%d')                   # 2026-05-01
+        print(f"📅 今天的目標日期格式: ['{t1}', '{t2}', '{t3}']")
         
+        # 4. 顯示試算表內的前三筆日期 (檢查格式用)
+        print(f"🔍 試算表內的前幾筆日期實際內容: {df[date_col].head(3).tolist()}")
+
+        # 5. 過濾資料
         df[date_col] = df[date_col].astype(str).str.strip()
-        due_memories = df[df[date_col].isin([today_str, today_dash])]
+        due = df[df[date_col].isin([t1, t2, t3])]
         
-        if not due_memories.empty:
-            for _, row in due_memories.iterrows():
-                status = send_flex_message(row[ig_col], row[content_col])
-                if status == 200:
-                    print(f"✅ 已成功為 {row[ig_col]} 發送精美卡片")
-        else:
-            print(f"✨ 檢查完畢：今日 ({today_str}) 無到期回憶")
+        if not due.empty:
+            print(f"🎯 找到 {len(due)} 則到期回憶！")
+            msg = f"🔔 憶起提醒：今天有 {len(due)} 則回憶到期！"
+            for _, row in due.iterrows():
+                msg += f"\n\n👤 來源: {row.iloc[1]}\n📜 內容: {row.iloc[2]}"
             
+            if LINE_TOKEN and USER_ID:
+                send_line_push(msg)
+            else:
+                print("⚠️ 警告: 缺少 LINE Secrets 設定")
+        else:
+            print("📭 檢查完畢：今天沒有符合日期的回憶。")
+
     except Exception as e:
         print(f"💥 發生錯誤: {e}")
 
