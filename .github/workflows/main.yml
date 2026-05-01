@@ -2,23 +2,28 @@ name: Daily Recall Check
 
 on:
   schedule:
-    - cron: '0 0 * * *' # 每天早上 8 點 (台灣時間)
-  workflow_dispatch: # 允許手動測試執行
+    # 每天台灣時間早上 8 點執行一次 (UTC 00:00)
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 允許手動執行測試
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: 檢出程式碼
+        uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - name: 設定 Python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-      - name: Install dependencies
-        run: pip install pandas
+      - name: 安裝必要套件
+        run: |
+          pip install pandas requests
 
-      - name: Run check
+      - name: 執行回憶檢查
+        env:
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
         run: python check_recall.py
