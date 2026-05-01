@@ -9,7 +9,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;500;700&display=swap');
         
         body {
-            /* 第一版專屬：放射狀深色漸層背景 */
             background: radial-gradient(circle at center, #1a1a2e 0%, #0f3460 100%);
             color: #e94560;
             font-family: 'Noto Sans TC', sans-serif;
@@ -18,11 +17,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         .glass {
-            /* 第一版專屬：高透明度磨砂玻璃感 */
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
@@ -43,18 +41,10 @@
         }
 
         #hidden_iframe { display: none; }
-        
-        /* 隱藏原生日期選擇器的圖示樣式優化 */
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-            opacity: 0.5;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body class="p-4">
 
-    <!-- 靜默送出用的隱藏 iframe -->
     <script type="text/javascript">var submitted=false;</script>
     <iframe name="hidden_iframe" id="hidden_iframe" onload="if(submitted) {showSuccess();}"></iframe>
 
@@ -62,26 +52,23 @@
         <h1 class="text-4xl font-bold mb-3 tracking-[0.3em] ml-3">看我幹啥</h1>
         <p class="text-gray-400 text-sm mb-10 tracking-widest uppercase">Recall the moment</p>
 
-        <!-- 注意：action 網址必須是 /formResponse 結尾 -->
-        <form action="https://docs.google.com/forms/d/e/1FAIpQLSd7S7a5_v8Nf6r9F0F5-N8p9X8p9X8p9X8p9X8p9X8p9X8p9X/formResponse" 
+
+        <form action="https://docs.google.com/forms/d/e/1FAIpQLScGJTKePgYFMMDoW7OyKL-gR8JevgdCvxA9Q4HVUw8tHI7OCw/formResponse" 
               method="POST" 
               target="hidden_iframe" 
               onsubmit="submitted=true;" 
               class="space-y-6 text-left">
             
-            <!-- Instagram ID -->
             <div>
                 <label class="block text-[10px] uppercase tracking-widest mb-2 opacity-50 font-bold">Instagram ID</label>
                 <input type="text" name="entry.1163321467" placeholder="@" class="w-full p-3 rounded-xl transition" required>
             </div>
 
-            <!-- 信件內容 -->
             <div>
                 <label class="block text-[10px] uppercase tracking-widest mb-2 opacity-50 font-bold">封存的內容</label>
                 <textarea name="entry.372515629" rows="4" placeholder="寫給未來的自己..." class="w-full p-3 rounded-xl transition" required></textarea>
             </div>
 
-            <!-- 開啟日期 -->
             <div>
                 <label class="block text-[10px] uppercase tracking-widest mb-2 opacity-50 font-bold">開啟日期</label>
                 <input type="date" name="entry.1806256761" class="w-full p-3 rounded-xl transition" required>
@@ -93,31 +80,22 @@
         </form>
     </div>
 
-    <!-- 成功畫面 (預設隱藏) -->
     <div id="success-message" class="hidden text-center opacity-0 transition-opacity duration-1000">
         <h2 class="text-3xl font-light tracking-widest text-white mb-4">回憶已送往未來</h2>
         <p class="text-gray-400">時間到了，我們會再相見。</p>
-        <button onclick="location.reload()" class="mt-8 text-[10px] text-gray-500 uppercase tracking-[0.2em] hover:text-white transition">返回</button>
     </div>
 
     <script>
         function showSuccess() {
             const formBox = document.getElementById('form-container');
             const successBox = document.getElementById('success-message');
-
-            // 表單淡出並縮小
             formBox.classList.add('opacity-0', 'scale-90');
-            
             setTimeout(() => {
                 formBox.style.display = 'none';
                 successBox.classList.remove('hidden');
-                // 成功訊息淡入
-                setTimeout(() => {
-                    successBox.classList.add('opacity-100');
-                }, 50);
+                setTimeout(() => { successBox.classList.add('opacity-100'); }, 50);
             }, 500);
         }
     </script>
-
 </body>
 </html>
