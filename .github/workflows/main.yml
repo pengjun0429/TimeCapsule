@@ -1,10 +1,10 @@
-name: Daily Recall Check
+name: Hourly Recall Check
 
 on:
   schedule:
-    # 每天台灣時間早上 8 點執行一次 (UTC 00:00)
-    - cron: '0 0 * * *'
-  workflow_dispatch: # 允許手動執行測試
+    # 這裡的設定代表每小時執行一次 (例如 1:00, 2:00...)
+    - cron: '0 * * * *'
+  workflow_dispatch: # 保留手動執行的按鈕
 
 jobs:
   build:
@@ -27,3 +27,4 @@ jobs:
           LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
         run: python check_recall.py
+
