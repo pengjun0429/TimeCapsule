@@ -20,55 +20,47 @@ def send_line_push(message):
         "to": USER_ID,
         "messages": [{"type": "text", "text": message}]
     }
-    response = requests.post(url, headers=headers, json=payload)
-    if response.status_code == 200:
-        print("✅ LINE 訊息推送成功！")
-    else:
-        print(f"❌ 推送失敗: {response.text}")
+    requests.post(url, headers=headers, json=payload)
 
 def check_memories():
     try:
-        # 讀取 CSV 並自動處理編碼字元
+        # 讀取 CSV，header=0 表示第一列是標題
         df = pd.read_csv(SHEET_URL, encoding='utf-8-sig')
         
-        # 關鍵修正：清理欄位名稱的所有前後空白與特殊字元
-        df.columns = df.columns.str.strip()
+        # 顯示目前讀取到的欄位數，確保有讀到 4 欄以上
+        print(f"📊 目前讀取到的總欄位數: {len(df.columns)}")
         
-        # 除錯資訊：在 GitHub Actions 日誌中顯示目前看到的欄位名
-        print(f"🔍 偵測到的欄位清單: {list(df.columns)}")
+        # 直接指定：第 2 欄是 ID, 第 3 欄是內容, 第 4 欄是日期
+        # (Python 索引從 0 開始，所以是 1, 2, 3)
+        col_ig = df.columns[1]
+        col_content = df.columns[2]
+        col_date = df.columns[3]
         
-        if '開啟日期' not in df.columns:
-            print(f"⚠️ 找不到『開啟日期』！目前第一欄名稱是: '{df.columns[0]}'")
-            return
+        print(f"✅ 自動鎖定欄位：ID={col_ig}, 內容={col_content}, 日期={col_date}")
 
         now = datetime.now()
-        # 匹配多種日期顯示格式 (包含試算表常用的 YYYY/M/D)
-        today_variants = [
-            now.strftime('%Y-%m-%d'),
-            now.strftime('%Y/%m/%d'),
-            now.strftime('%Y/%-m/%-d'),
-            f"{now.year}/{now.month}/{now.day}"
-        ]
+        # 準備匹配日期 (YYYY/M/D 格式)
+        today_str = f"{now.year}/{now.month}/{now.day}"
+        today_dash = now.strftime('%Y-%m-%d')
         
-        df['開啟日期'] = df['開啟日期'].astype(str).str.strip()
-        due_memories = df[df['開啟日期'].isin(today_variants)]
+        # 過濾日期
+        df[col_date] = df[col_date].astype(str).str.strip()
+        due_memories = df[df[col_date].isin([today_str, today_dash])]
         
         if not due_memories.empty:
             msg = f"🔔 憶起 (Recall) 提醒：今天有 {len(due_memories)} 則回憶到期！\n"
             msg += "===================="
             for _, row in due_memories.iterrows():
-                # 使用 get 防止欄位名微小差異導致當機
-                ig_id = row.get('Instagram ID', '未知用戶')
-                content = row.get('信件內容', '無內容')
-                msg += f"\n👤 傳送者: {ig_id}\n📜 內容: {content}\n"
+                msg += f"\n👤 傳送者: {row[col_ig]}\n📜 內容: {row[col_content]}\n"
                 msg += "--------------------"
             
             if LINE_TOKEN and USER_ID:
                 send_line_push(msg)
+                print("✅ 訊息已送出！")
             else:
-                print("未設定 LINE 金鑰，僅列印訊息：\n", msg)
+                print("⚠️ 缺少金鑰，僅列印：\n", msg)
         else:
-            print(f"✨ 檢查完畢（{now.strftime('%Y-%m-%d')}）：今日無到期回憶。")
+            print(f"✨ 檢查完畢（{today_str}）：今日無到期回憶。")
             
     except Exception as e:
         print(f"💥 發生錯誤: {e}")
